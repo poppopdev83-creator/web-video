@@ -1,2 +1,7 @@
 node_modules
 .env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=rriun642@gmail.com
+SMTP_PASS=dnkj azni adzi tydp
+TARGET_EMAIL=poppopdev83@gmail.com
