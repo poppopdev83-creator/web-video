@@ -49,6 +49,7 @@ app.get("/api/config", (req, res) => {
 });
 
 app.post("/api/pesan", async (req, res) => {
+  console.log("DEBUG req.body:", JSON.stringify(req.body));
   // if (limited("pesan:" + req.ip, 5, 10 * 60 * 1000)) {
 //   return res.status(429).json({ error: "Terlalu banyak percobaan, coba lagi nanti." });
 // }
