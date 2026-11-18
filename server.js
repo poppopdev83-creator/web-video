@@ -66,4 +66,8 @@ app.post("/api/pesan", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log("Server berjalan di port " + PORT));
+if (require.main === module) {
+  app.listen(PORT, () => console.log("Server berjalan di port " + PORT));
+}
+
+module.exports = app;
