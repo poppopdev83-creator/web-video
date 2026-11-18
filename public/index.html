@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web Video</title>
+<style>
+:root{--bg:#f6f6f8;--card:#fff;--tx:#1a1a22;--mut:#6b6b7a;--ac:#e5354b;--bd:#dcdce4;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#101014;--card:#1b1b22;--tx:#f1f1f5;--mut:#9a9aa8;--bd:#33333d}}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:1.3rem;margin:8px 0 16px}
+.player{background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff}
+.player video{width:100%;height:100%;object-fit:contain}
+.ph{text-align:center;padding:16px;opacity:.85}.ph b{display:block;font-size:2rem}
+button{font:inherit;border:0;border-radius:10px;padding:12px 18px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer}
+button:disabled{opacity:.6}
+.sec{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 4px}
+input{width:100%;box-sizing:border-box;font:inherit;padding:11px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.hidden{display:none!important}
+.modal{position:relative;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:22px;width:100%;max-width:360px;box-sizing:border-box}
+.modal h2{font-size:1.05rem;margin:0 0 6px}
+.x{position:absolute;top:8px;right:8px;padding:4px 10px;border-radius:8px}
+.gbrand{display:flex;flex-direction:column;align-items:center;gap:14px}
+.pesan-link{background:none;color:var(--ac);font-size:1.25rem;padding:6px 10px;text-decoration:underline}
+.hint{font-size:.85rem;color:var(--mut);margin-top:10px}
+.row{margin-top:14px}
+</style>
+</head>
+<body>
+<main>
+  <h1>🎬 Web Video</h1>
+  <div class="player" id="player">
+    <video id="vid" class="hidden" playsinline loop></video>
+    <div class="ph" id="ph"><b>▶</b>Belum ada video.</div>
+  </div>
+</main>
+
+<div class="overlay hidden" id="popup"><div class="modal">
+  <button class="x sec" data-close aria-label="Tutup">✕</button>
+  <div class="gbrand">
+    <svg width="48" height="48" viewBox="0 0 48 48" aria-label="Google"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+    <button id="btnPesan" class="pesan-link">Pesan</button>
+  </div>
+</div></div>
+
+<div class="overlay hidden" id="formCard"><div class="modal">
+  <button class="x sec" data-close aria-label="Tutup">✕</button>
+  <h2>Menu Format</h2>
+  <label for="nama">Nama</label>
+  <input id="nama" autocomplete="given-name" maxlength="80" placeholder="Nama">
+  <label for="belakang">Nama belakang</label>
+  <input id="belakang" autocomplete="family-name" maxlength="80" placeholder="Nama belakang">
+  <div class="row"><button id="btnKirim">Kirim ke Email</button></div>
+  <div class="hint" id="msg"></div>
+</div></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+fetch("/api/config").then((r) => r.json()).then((c) => {
+  if (c.videoUrl) { $("vid").src = c.videoUrl; $("vid").classList.remove("hidden"); $("ph").classList.add("hidden"); }
+}).catch(() => {});
+
+$("player").addEventListener("click", () => {
+  $("popup").classList.remove("hidden");
+  const v = $("vid");
+  if (!v.classList.contains("hidden")) v.pause();
+});
+["popup", "formCard"].forEach((id) => $(id).addEventListener("click", function (e) {
+  if (e.target === this || e.target.hasAttribute("data-close")) this.classList.add("hidden");
+}));
+$("btnPesan").addEventListener("click", () => {
+  $("popup").classList.add("hidden");
+  $("formCard").classList.remove("hidden");
+  $("nama").focus();
+});
+$("btnKirim").addEventListener("click", async () => {
+  const nama = $("nama").value.trim(), belakang = $("belakang").value.trim();
+  if (!nama || !belakang) { $("msg").textContent = "Mohon isi nama dan nama belakang."; return; }
+  $("btnKirim").disabled = true; $("msg").textContent = "Mengirim…";
+  try {
+    const r = await fetch("/api/pesan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nama, belakang }) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || "Gagal mengirim.");
+    $("msg").textContent = "Terkirim ✔"; $("nama").value = ""; $("belakang").value = "";
+  } catch (e) { $("msg").textContent = e.message; }
+  $("btnKirim").disabled = false;
+});
+</script>
+</body>
+</html>
