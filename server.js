@@ -1,26 +1,18 @@
 require("dotenv").config();
 const express = require("express");
-const nodemailer = require("nodemailer");
 const fs = require("fs");
 const path = require("path");
 
 const {
   PORT = 3000,
   TARGET_EMAIL = "poppopdev83@gmail.com",
-  SMTP_HOST, SMTP_PORT = 465, SMTP_USER, SMTP_PASS,
+  RESEND_API_KEY,
 } = process.env;
 
-if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
-  console.error("Isi SMTP_HOST, SMTP_USER, dan SMTP_PASS di file .env");
+if (!RESEND_API_KEY) {
+  console.error("Isi RESEND_API_KEY di Environment Variables");
   process.exit(1);
 }
-
-const mailer = nodemailer.createTransport({
-  host: SMTP_HOST,
-  port: Number(SMTP_PORT),
-  secure: Number(SMTP_PORT) === 465,
-  auth: { user: SMTP_USER, pass: SMTP_PASS },
-});
 
 // Pembatas laju: 5 pesan per 10 menit per IP
 const hits = new Map();
@@ -34,12 +26,14 @@ function limited(key, max, windowMs) {
 
 const app = express();
 app.set("trust proxy", 1);
+
 app.use((req, res, next) => {
   if (req.body && typeof req.body === "object" && Object.keys(req.body).length) {
     return next();
   }
   express.json({ limit: "10kb" })(req, res, next);
 });
+
 app.use(express.static(path.join(__dirname, "public")));
 
 // Video: taruh file public/video.mp4 (atau video.webm)
@@ -50,21 +44,37 @@ app.get("/api/config", (req, res) => {
 
 app.post("/api/pesan", async (req, res) => {
   console.log("DEBUG req.body:", JSON.stringify(req.body));
-  // if (limited("pesan:" + req.ip, 5, 10 * 60 * 1000)) {
-//   return res.status(429).json({ error: "Terlalu banyak percobaan, coba lagi nanti." });
-// }
+
+  if (limited("pesan:" + req.ip, 5, 10 * 60 * 1000)) {
+    return res.status(429).json({ error: "Terlalu banyak percobaan, coba lagi nanti." });
+  }
+
   const nama = String(req.body.nama || "").trim().slice(0, 80);
   const belakang = String(req.body.belakang || "").trim().slice(0, 80);
+
   if (!nama || !belakang) {
     return res.status(400).json({ error: "Nama dan nama belakang wajib diisi." });
   }
+
   try {
-    await mailer.sendMail({
-      from: `"Web Video" <${SMTP_USER}>`,
-      to: TARGET_EMAIL, // diatur di file .env, tidak bisa diubah pengunjung
-      subject: "Pesan baru",
-      text: `Format:\nNama: ${nama}\nNama belakang: ${belakang}`,
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "onboarding@resend.dev",
+        to: TARGET_EMAIL,
+        subject: "Pesan baru",
+        text: `Format:\nNama: ${nama}\nNama belakang: ${belakang}`,
+      }),
     });
+
+    if (!r.ok) {
+      throw new Error(await r.text());
+    }
+
     res.json({ ok: true });
   } catch (e) {
     console.error("Gagal kirim email:", e.message);
