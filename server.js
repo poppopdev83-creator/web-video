@@ -49,9 +49,9 @@ app.get("/api/config", (req, res) => {
 });
 
 app.post("/api/pesan", async (req, res) => {
-  if (limited("pesan:" + req.ip, 5, 10 * 60 * 1000)) {
-    return res.status(429).json({ error: "Terlalu banyak percobaan, coba lagi nanti." });
-  }
+  // if (limited("pesan:" + req.ip, 5, 10 * 60 * 1000)) {
+//   return res.status(429).json({ error: "Terlalu banyak percobaan, coba lagi nanti." });
+// }
   const nama = String(req.body.nama || "").trim().slice(0, 80);
   const belakang = String(req.body.belakang || "").trim().slice(0, 80);
   if (!nama || !belakang) {
