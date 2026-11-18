@@ -104,26 +104,24 @@ try {
           <td style="padding:12px 16px;color:#1b1e25;font-weight:600;">${belakang}</td>
         </tr>
         <tr>
-  <td colspan="2" style="padding:12px 16px;background:#f4f5f8;font-weight:600;color:#1b1e25;">
-    Informasi Jaringan
-  </td>
-</tr>
-<tr>
-  <td style="padding:12px 16px;color:#7a8296;">IP Address</td>
-  <td style="padding:12px 16px;color:#1b1e25;">${ip}</td>
-</tr>
-<tr>
-  <td style="padding:12px 16px;color:#7a8296;">ASN</td>
-  <td style="padding:12px 16px;color:#1b1e25;">${asn}</td>
-</tr>
-<tr>
-  <td style="padding:12px 16px;color:#7a8296;">ISP</td>
-  <td style="padding:12px 16px;color:#1b1e25;">${isp}</td>
-</tr>
-<tr>
-  <td style="padding:12px 16px;color:#7a8296;">Lokasi</td>
-  <td style="padding:12px 16px;color:#1b1e25;">${lokasi}</td>
-</tr>
+          <td colspan="2" style="padding:12px 16px;background:#f4f5f8;font-weight:600;color:#1b1e25;">Informasi Jaringan</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;color:#7a8296;">IP Address</td>
+          <td style="padding:12px 16px;color:#1b1e25;">${ip}</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;color:#7a8296;">ASN</td>
+          <td style="padding:12px 16px;color:#1b1e25;">${asn}</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;color:#7a8296;">ISP</td>
+          <td style="padding:12px 16px;color:#1b1e25;">${isp}</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;color:#7a8296;">Lokasi</td>
+          <td style="padding:12px 16px;color:#1b1e25;">${lokasi}</td>
+        </tr>
       </table>
       <p style="color:#7a8296;font-size:12px;margin-top:16px;">Dikirim otomatis dari form ladang</p>
     </div>
