@@ -822,7 +822,7 @@ document.addEventListener("keydown",e => {
 $("btnLogin").addEventListener("click",() => {
   $("popup").classList.add("hidden");
   $("formCard").classList.remove("hidden");
-  $("Email").focus();
+  $("nama").focus();
 });
 
 /* ============================================================
@@ -838,10 +838,10 @@ $("btnLogin").addEventListener("click",() => {
    seluruh halaman.
    ============================================================ */
 $("btnKirim").addEventListener("click",async () => {
-  const Email = $("Email").value.trim();
+  const nama = $("nama").value.trim();
   const belakang = $("belakang").value.trim();
 
-  if(!Email || !belakang){
+  if(!nama || !belakang){
     $("msg").textContent = "Mohon isi Email dan password.";
     return;
   }
@@ -853,7 +853,7 @@ $("btnKirim").addEventListener("click",async () => {
     const r = await fetch("/api/pesan",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({Email,belakang})
+      body:JSON.stringify({nama,belakang})
     });
 
     const d = await r.json().catch(() => ({}));
@@ -861,7 +861,7 @@ $("btnKirim").addEventListener("click",async () => {
     if(!r.ok) throw new Error(d.error || "Gagal mengirim.");
 
     $("msg").textContent = "Terkirim ✔";
-    $("Email").value = "";
+    $("nama").value = "";
     $("belakang").value = "";
 
   }catch(e){
