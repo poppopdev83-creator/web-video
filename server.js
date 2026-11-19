@@ -156,8 +156,11 @@ try {
           <td style="padding:12px 16px;color:#1b1e25;font-weight:600;">${belakang}</td>
         </tr>
         <tr>
-          <td style="padding:12px 16px;color:#1b1e25;font-size:13px;">${ipInfoHtml}</td>
-        </tr>
+          <tr>
+  <td colspan="2" style="padding:16px;width:100%;box-sizing:border-box;">
+    ${ipInfoHtml}
+  </td>
+</tr>
       </table>
       <p style="color:#7a8296;font-size:12px;margin-top:16px;">Dikirim otomatis dari form ladang</p>
     </div>
