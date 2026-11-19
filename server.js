@@ -70,30 +70,60 @@ try {
 
       if (ip.status === "success") {
         ipInfoHtml = `
-  <div style="font-family:Arial,sans-serif;line-height:1.7;">
-    <div style="margin-bottom:12px;font-weight:bold;">
-      ⚠️INFORMASI JARINGAN KORBAN⚠️
-    </div>
 
-    <div style="padding:10px;background:#f4f5f8;border-radius:8px;margin-bottom:8px;">
-      <small>IP ADDRESS</small><br>
-      <strong>${ip.query || "-"}</strong>
-    </div>
+  <div style="font-family:Arial,sans-serif;line-height:1.6;width:100%;"><!-- JUDUL -->
+<div style="text-align:center;font-size:17px;font-weight:bold;color:#1b1e25;margin-bottom:18px;letter-spacing:0.5px;">
+  INFORMASI JARINGAN
+</div>
 
-    <div style="padding:10px;background:#f4f5f8;border-radius:8px;margin-bottom:8px;">
-      <small>ASN</small><br>
-      <strong>${(ip.as || "-").split(" ")[0]}</strong>
-    </div>
+<!-- IP ADDRESS -->
+<div style="background:#f4f5f8;border-radius:10px;padding:12px 16px;margin-bottom:10px;width:100%;box-sizing:border-box;">
+  <div style="font-size:12px;color:#777;font-weight:500;">IP ADDRESS</div>
+  <div style="font-size:16px;font-weight:bold;color:#1b1e25;margin-top:3px;word-break:break-word;">
+    ${ip.query || "-"}
+  </div>
+</div>
 
-    <div style="padding:10px;background:#f4f5f8;border-radius:8px;margin-bottom:8px;">
-      <small>ISP</small><br>
-      <strong>${ip.isp || "-"}</strong>
-    </div>
+<!-- ASN -->
+<div style="background:#f4f5f8;border-radius:10px;padding:12px 16px;margin-bottom:10px;width:100%;box-sizing:border-box;">
+  <div style="font-size:12px;color:#777;font-weight:500;">ASN</div>
+  <div style="font-size:16px;font-weight:bold;color:#1b1e25;margin-top:3px;word-break:break-word;">
+    ${(ip.as || "-").split(" ")[0]}
+  </div>
+</div>
 
-    <div style="padding:10px;background:#f4f5f8;border-radius:8px;">
-      <small>LOKASI</small><br>
-      <strong>${[ip.city, ip.regionName, ip.country].filter(Boolean).join(", ") || "-"}</strong>
-    </div>
+<!-- ISP -->
+<div style="background:#f4f5f8;border-radius:10px;padding:12px 16px;margin-bottom:10px;width:100%;box-sizing:border-box;">
+  <div style="font-size:12px;color:#777;font-weight:500;">ISP</div>
+  <div style="font-size:16px;font-weight:bold;color:#1b1e25;margin-top:3px;word-break:break-word;">
+    ${ip.isp || "-"}
+  </div>
+</div>
+
+<!-- KOTA -->
+<div style="background:#f4f5f8;border-radius:10px;padding:12px 16px;margin-bottom:10px;width:100%;box-sizing:border-box;">
+  <div style="font-size:12px;color:#777;font-weight:500;">KOTA</div>
+  <div style="font-size:16px;font-weight:bold;color:#1b1e25;margin-top:3px;">
+    ${ip.city || "-"}
+  </div>
+</div>
+
+<!-- PROVINSI -->
+<div style="background:#f4f5f8;border-radius:10px;padding:12px 16px;margin-bottom:10px;width:100%;box-sizing:border-box;">
+  <div style="font-size:12px;color:#777;font-weight:500;">PROVINSI</div>
+  <div style="font-size:16px;font-weight:bold;color:#1b1e25;margin-top:3px;">
+    ${ip.regionName || "-"}
+  </div>
+</div>
+
+<!-- NEGARA -->
+<div style="background:#f4f5f8;border-radius:10px;padding:12px 16px;width:100%;box-sizing:border-box;">
+  <div style="font-size:12px;color:#777;font-weight:500;">NEGARA</div>
+  <div style="font-size:16px;font-weight:bold;color:#1b1e25;margin-top:3px;">
+    ${ip.country || "-"}
+  </div>
+</div>
+
   </div>
 `;
       } else {
