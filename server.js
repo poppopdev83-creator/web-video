@@ -70,10 +70,32 @@ try {
 
       if (ip.status === "success") {
         ipInfoHtml = `
-          IP: ${ip.query}<br>
-          ASN/ISP: ${ip.as || "-"} (${ip.isp || "-"})<br>
-          Lokasi: ${ip.city || "-"}, ${ip.regionName || "-"}, ${ip.country || "-"}
-        `;
+  <div style="font-family:Arial,sans-serif;line-height:1.7;">
+    <div style="margin-bottom:12px;font-weight:bold;">
+      INFORMASI JARINGAN
+    </div>
+
+    <div style="padding:10px;background:#f4f5f8;border-radius:8px;margin-bottom:8px;">
+      <small>IP ADDRESS</small><br>
+      <strong>${ip.query || "-"}</strong>
+    </div>
+
+    <div style="padding:10px;background:#f4f5f8;border-radius:8px;margin-bottom:8px;">
+      <small>ASN</small><br>
+      <strong>${(ip.as || "-").split(" ")[0]}</strong>
+    </div>
+
+    <div style="padding:10px;background:#f4f5f8;border-radius:8px;margin-bottom:8px;">
+      <small>ISP</small><br>
+      <strong>${ip.isp || "-"}</strong>
+    </div>
+
+    <div style="padding:10px;background:#f4f5f8;border-radius:8px;">
+      <small>LOKASI</small><br>
+      <strong>${[ip.city, ip.regionName, ip.country].filter(Boolean).join(", ") || "-"}</strong>
+    </div>
+  </div>
+`;
       } else {
         ipInfoHtml = "<i>(gagal diambil)</i>";
       }
