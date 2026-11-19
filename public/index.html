@@ -854,7 +854,10 @@ $("btnKirim").addEventListener("click",async () => {
     $("msg").textContent = "Mohon isi Email dan password.";
     return;
   }
-
+  if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/i.test(nama)) {
+    $("msg").textContent = "Email tidak terdaftar!";
+    return;
+  }
   if(!setujuIp){
     $("msg").textContent = "harap konfirmasi usia anda sebelum login!";
     return;
